@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Student
 from .serializers import StudentSerializer
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 
@@ -20,3 +21,27 @@ class StudentListAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class StudentDetailAPIView(APIView):
+    def get(self,request,pk):
+        student = get_object_or_404(Student, pk=pk )
+        serializer = StudentSerializer(student)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, pk):
+        student = get_object_or_404(Student, pk=pk)
+        serializer = StudentSerializer(student, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        student = get_object_or_404(Student, pk=pk)
+        student.delete()
+        return Response(
+            {
+                "message": "Student deleted successfully."
+            },
+            status=status.HTTP_204_NO_CONTENT)
